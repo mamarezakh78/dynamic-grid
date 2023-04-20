@@ -1,1 +1,37 @@
-<p>grid works!</p>
+<section class="grid-container">
+
+    <!-- Title -->
+    <h2 class="title">{{title}}</h2>
+
+    <!-- Top Tools -->
+    <section class="top-tools-container">
+
+        <!-- Search -->
+        <div class="search-containr">
+            <input type="text" placeholder="Search..." class="search-input p-2">
+            <button class="search-btn">
+                <span class="material-icons">search</span>
+            </button>
+        </div>
+
+        <div class="flex-grow-1"></div>
+
+        <!-- Group Action -->
+        <div>
+            <button mat-stroked-button color="primary" [matMenuTriggerFor]="groupAction" class="flex-row-reverse">
+                Group Action
+                <span class="material-icons">arrow_drop_down</span>
+            </button>
+
+            <mat-menu #groupAction="matMenu">
+                <button mat-menu-item>Item 1</button>
+                <button mat-menu-item>Item 2</button>
+            </mat-menu>
+        </div>
+
+    </section>
+
+    
+
+
+</section>
