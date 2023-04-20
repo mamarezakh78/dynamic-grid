@@ -1,0 +1,13 @@
+<div class="paginator-container d-flex">
+
+    <div class="d-flex">
+        <span class="material-icons">arrow_back</span>
+
+        <ng-container *ngFor="let pageIndex of pageList">
+            <button (click)="onClickPageNumber(pageIndex)">{{pageIndex}}</button>
+        </ng-container>
+
+        <span class="material-icons">arrow_forward</span>
+    </div>
+
+</div>

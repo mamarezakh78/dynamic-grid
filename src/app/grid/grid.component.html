@@ -59,7 +59,7 @@
                         <mat-checkbox color="primary"></mat-checkbox>
                     </td>
 
-                    <td>{{i + 1}}</td>
+                    <td>{{i + 1 + pageIndex * pageSize}}</td>
 
                     <td *ngFor="let column of columns">
                         {{row[column.key]}}
@@ -71,8 +71,11 @@
         </table>
     </section>
 
-    <section>
-
+    <section class="mt-3">
+        <ng-container *ngIf="dataSource$ | async as dataSource">
+            <paginator [dataLength]="dataSource.length" [pageSize]="pageSize" (onChangePage)="onChangePage($event)">
+            </paginator>
+        </ng-container>
     </section>
 
 

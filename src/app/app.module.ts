@@ -3,14 +3,16 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { GridComponent } from './grid/grid.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
   ],
   imports: [
     BrowserModule,
-    GridComponent
+    GridComponent,
+    BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

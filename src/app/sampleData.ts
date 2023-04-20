@@ -4,9 +4,9 @@ export class SampleData {
 
         let sampleData: IUser[] = [];
 
-        for (let i = 0; i < 120; i++) {
+        for (let i = 0; i < 78; i++) {
             const user: IUser = {
-                userId: 1000,
+                userId: i + 1,
                 username: "Mohamed Ahmed Nooh",
                 email: "mohamed124@gmail.com",
                 phone: "09876545482",
