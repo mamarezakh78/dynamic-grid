@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatButtonModule} from '@angular/material/button';
-import {MatCheckboxModule} from '@angular/material/checkbox';
+import { Component, Input, OnInit } from '@angular/core';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { Column } from './model/column.model';
+import { Observable } from 'rxjs';
 @Component({
     standalone: true,
     selector: 'grid',
@@ -15,10 +17,25 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
         MatCheckboxModule
     ]
 })
-export class GridComponent {
+export class GridComponent implements OnInit {
 
     @Input() title: string = "Title";
 
-    
+    @Input() hasMultiselect: boolean = true;
+
+    @Input() columns: Column[] = [];
+
+    @Input() getDataSource: () => Observable<any[]>;
+
+    filterData$: Observable<any[]>;
+
+    ngOnInit(): void {
+        this.setFilterData();
+    }
+
+    setFilterData() {
+       this.filterData$ = this.getDataSource();
+    }
+
 
 }

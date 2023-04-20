@@ -50,3 +50,18 @@
     border-bottom-right-radius: 0.5rem;
 }
 
+.table-container {
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+}
+
+.table-container > table > thead > tr > th, .table-container > table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+.table-container > table > tbody > tr > td {
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 10px;
+    text-overflow: ellipsis;
+}
