@@ -4,10 +4,11 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { Column, ActionOption as GridAction, GridRow } from './model/column.model';
-import { Observable, ReplaySubject, map, of, shareReplay, tap } from 'rxjs';
+import { Observable, ReplaySubject, map, of, shareReplay, takeUntil, tap } from 'rxjs';
 import { PaginatorComponent } from '../paginator/paginator.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SearchComponent } from '../search/search.component';
+import { Destoryable } from '../tools/destroyable';
 
 @Component({
     standalone: true,
@@ -22,10 +23,11 @@ import { SearchComponent } from '../search/search.component';
         PaginatorComponent,
         FormsModule,
         ReactiveFormsModule,
-        SearchComponent
+        SearchComponent,
+        Destoryable
     ]
 })
-export class GridComponent implements OnInit, AfterViewInit {
+export class GridComponent extends Destoryable implements OnInit, AfterViewInit {
 
     @Input() title: string = "Title";
 
@@ -41,11 +43,11 @@ export class GridComponent implements OnInit, AfterViewInit {
 
     @Input() primaryKey: string;
 
-    private dataSource$: Observable<GridRow[]>
+    private gridRowDataSource$: Observable<GridRow[]>
 
     cachedData$: ReplaySubject<any[]> = new ReplaySubject(1);
 
-    filterData$: Observable<GridRow[]>;
+    filteredRows$: Observable<GridRow[]>;
 
     multiSelectedRows: { [key: number]: any } = {};
 
@@ -64,18 +66,21 @@ export class GridComponent implements OnInit, AfterViewInit {
     private initDataSource() {
         this.setCachData();
 
-        this.dataSource$ = this.getMapDataSourceToGridRows();
+        this.gridRowDataSource$ = this.getMappedDataToGridRows();
 
         this.getFirstPage();
     }
 
-    setCachData() {
-        this.getDataSource().subscribe(data => {
-            this.cachedData$.next(data);
-        })
+    private setCachData() {
+        this.getDataSource()
+            .pipe(
+                takeUntil(this.destroy$)
+            ).subscribe(data => {
+                this.cachedData$.next(data);
+            })
     }
 
-    private getMapDataSourceToGridRows(): Observable<GridRow[]> {
+    private getMappedDataToGridRows(): Observable<GridRow[]> {
         return this.cachedData$.pipe(
             shareReplay(),
             map(data => {
@@ -102,7 +107,7 @@ export class GridComponent implements OnInit, AfterViewInit {
     }
 
     private filterRows(from: number) {
-        this.filterData$ = this.dataSource$.pipe(
+        this.filteredRows$ = this.gridRowDataSource$.pipe(
             map(data => {
 
                 const filteredList: GridRow[] = data.slice(from, from + this.pageSize);
@@ -146,7 +151,7 @@ export class GridComponent implements OnInit, AfterViewInit {
     }
 
     onChangeAllRowsCheckbox(event: MatCheckboxChange) {
-        this.dataSource$.pipe(
+        this.gridRowDataSource$.pipe(
             map(data => {
                 console.log("All Ckeck");
 
@@ -157,7 +162,8 @@ export class GridComponent implements OnInit, AfterViewInit {
 
                     return row
                 })
-            })
+            }),
+            takeUntil(this.destroy$)
         ).subscribe();
 
         this.filterRows(this.pageIndex * this.pageSize);
@@ -168,7 +174,7 @@ export class GridComponent implements OnInit, AfterViewInit {
      * @param searchFilteredData emitted filteredData from searchComponent
      */
     getSearchFilteredData(searchFilteredData: any[]) {
-        this.dataSource$ = of(searchFilteredData).pipe(
+        this.gridRowDataSource$ = of(searchFilteredData).pipe(
             map(dataList => {
                 this.dataCount = dataList.length;
 

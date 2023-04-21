@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Observable, map } from 'rxjs';
+import { Observable, map, takeUntil } from 'rxjs';
+import { Destoryable } from '../tools/destroyable';
 
 @Component({
     standalone: true,
@@ -14,11 +15,11 @@ import { Observable, map } from 'rxjs';
         CommonModule
     ]
 })
-export class SearchComponent {
+export class SearchComponent extends Destoryable {
 
     @Input() dataSource: Observable<any[]>
 
-    @Output() filteredData = new EventEmitter<any[]>();
+    @Output() filterData = new EventEmitter<any[]>();
 
     searchCtrl: FormControl = new FormControl("");
 
@@ -46,9 +47,10 @@ export class SearchComponent {
                 console.log("Search");
 
                 return filteredData
-            })
-        ).subscribe(_filteredData => {
-            this.filteredData.emit(_filteredData);
+            }),
+            takeUntil(this.destroy$)
+        ).subscribe(data => {
+            this.filterData.emit(data);
         })
     }
 }

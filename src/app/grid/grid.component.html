@@ -58,7 +58,7 @@
 
             <!-- Body -->
             <tbody>
-                <tr *ngFor="let row of filterData$ | async; let i = index">
+                <tr *ngFor="let row of filteredRows$ | async; let i = index">
 
                     <td *ngIf="hasMultiselect">
                         <mat-checkbox color="primary"
