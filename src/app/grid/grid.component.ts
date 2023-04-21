@@ -6,8 +6,9 @@ import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox
 import { Column, ActionOption as GridAction, GridRow } from './model/column.model';
 import { Observable, ReplaySubject, map, of, shareReplay, tap } from 'rxjs';
 import { PaginatorComponent } from '../paginator/paginator.component';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SearchComponent } from '../search/search.component';
+
 @Component({
     standalone: true,
     selector: 'grid',
@@ -33,6 +34,8 @@ export class GridComponent implements OnInit, AfterViewInit {
     @Input() getDataSource: () => Observable<any[]>;
 
     @Input() hasMultiselect: boolean = true;
+
+    @Input() hasSearch: boolean = true;
 
     @Input() groupAction: GridAction[] = [];
 
@@ -162,10 +165,10 @@ export class GridComponent implements OnInit, AfterViewInit {
 
     /**
      * 
-     * @param searchFilterData emitted filteredData from searchComponent
+     * @param searchFilteredData emitted filteredData from searchComponent
      */
-    getSearchFilterData(searchFilterData: any[]) {
-        this.dataSource$ = of(searchFilterData).pipe(
+    getSearchFilteredData(searchFilteredData: any[]) {
+        this.dataSource$ = of(searchFilteredData).pipe(
             map(dataList => {
                 this.dataCount = dataList.length;
 

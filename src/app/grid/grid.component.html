@@ -7,7 +7,9 @@
     <section class="top-tools-container">
 
         <!-- Search -->
-        <search [dataSource]="cachedData$" (filteredData)="getSearchFilterData($event)"></search>
+        <ng-container *ngIf="hasSearch">
+            <search [dataSource]="cachedData$" (filterData)="getSearchFilteredData($event)"></search>
+        </ng-container>
 
         <div class="flex-grow-1"></div>
 
