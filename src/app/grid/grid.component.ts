@@ -7,6 +7,7 @@ import { Column, ActionOption as GridAction, GridRow } from './model/column.mode
 import { Observable, ReplaySubject, map, of, shareReplay, tap } from 'rxjs';
 import { PaginatorComponent } from '../paginator/paginator.component';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SearchComponent } from '../search/search.component';
 @Component({
     standalone: true,
     selector: 'grid',
@@ -19,7 +20,8 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
         MatCheckboxModule,
         PaginatorComponent,
         FormsModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        SearchComponent
     ]
 })
 export class GridComponent implements OnInit, AfterViewInit {
@@ -38,7 +40,7 @@ export class GridComponent implements OnInit, AfterViewInit {
 
     private dataSource$: Observable<GridRow[]>
 
-    private cachedData$: ReplaySubject<any[]> = new ReplaySubject(1);
+    cachedData$: ReplaySubject<any[]> = new ReplaySubject(1);
 
     filterData$: Observable<GridRow[]>;
 
@@ -48,8 +50,6 @@ export class GridComponent implements OnInit, AfterViewInit {
     pageIndex: number = 0;
 
     dataCount: number = 0;
-
-    searchCtrl: FormControl = new FormControl("");
 
     ngOnInit(): void {
     }
@@ -95,29 +95,33 @@ export class GridComponent implements OnInit, AfterViewInit {
     }
 
     private getFirstPage() {
-        this.fetchFilterData(0);
+        this.filterRows(0);
     }
 
-    private fetchFilterData(from: number) {
+    private filterRows(from: number) {
         this.filterData$ = this.dataSource$.pipe(
             map(data => {
 
                 const filteredList: GridRow[] = data.slice(from, from + this.pageSize);
 
-                filteredList.forEach(row => {
-                    if (this.multiSelectedRows[row.rowId]) {
-                        row.rowSelected = true;
-                        this.multiSelectedRows[row.rowId] = row;
-                    }
-                    else {
-                        row.rowSelected = false;
-                    }
-                })
+                this.setStateOfRowSelect(filteredList);
 
                 return filteredList
             }),
             tap(r => console.log(r))
         )
+    }
+
+    private setStateOfRowSelect(filteredList: GridRow[]) {
+        filteredList.forEach(row => {
+            if (this.multiSelectedRows[row.rowId]) {
+                row.rowSelected = true;
+                this.multiSelectedRows[row.rowId] = row;
+            }
+            else {
+                row.rowSelected = false;
+            }
+        })
     }
 
     onChangePage(paginator: { pageIndex: number, pageSize: number }) {
@@ -126,7 +130,7 @@ export class GridComponent implements OnInit, AfterViewInit {
 
         const startIndexOfPage: number = this.pageIndex * this.pageSize;
 
-        this.fetchFilterData(startIndexOfPage);
+        this.filterRows(startIndexOfPage);
     }
 
     onChangeRowCheckBox(event: MatCheckboxChange, row: GridRow) {
@@ -153,40 +157,23 @@ export class GridComponent implements OnInit, AfterViewInit {
             })
         ).subscribe();
 
-        this.fetchFilterData(this.pageIndex * this.pageSize);
+        this.filterRows(this.pageIndex * this.pageSize);
     }
 
-    onKeypressSearch(event: KeyboardEvent) {
-        if (event.key == "Enter") {
-            this.search();
-        }
-    }
+    /**
+     * 
+     * @param searchFilterData emitted filteredData from searchComponent
+     */
+    getSearchFilterData(searchFilterData: any[]) {
+        this.dataSource$ = of(searchFilterData).pipe(
+            map(dataList => {
+                this.dataCount = dataList.length;
 
-    search() {
-        const searchValue = this.searchCtrl.value;
-
-        this.cachedData$.pipe(
-            map(data => {
-                const filteredData = data.filter(item => {
-
-                    for (const prop in item) {
-                        if (item[prop] && item[prop].toString().toLowerCase().includes(searchValue.toLowerCase())) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })
-
-                console.log("Search");
-
-                this.dataCount = filteredData.length;
-
-                return filteredData.map(row => this.createGridRow(row));
+                return dataList.map(data => this.createGridRow(data));
             })
-        ).subscribe(filteredData => {
-            this.dataSource$ = of(filteredData);
-            this.getFirstPage();
-        });
+        )
+
+        this.getFirstPage();
     }
 
 }

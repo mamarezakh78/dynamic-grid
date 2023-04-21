@@ -1,0 +1,11 @@
+<div class="search-containr">
+    <input type="text"
+           placeholder="Search..."
+           class="search-input p-2"
+           [formControl]="searchCtrl"
+           (keypress)="onKeypressSearch($event)">
+
+    <button class="search-btn" (click)="search()">
+        <span class="material-icons">search</span>
+    </button>
+</div>
