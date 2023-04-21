@@ -53,6 +53,7 @@
 .table-container {
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
+    min-height: 630px;
 }
 
 .table-container > table > thead > tr > th, .table-container > table > tbody > tr > td {
