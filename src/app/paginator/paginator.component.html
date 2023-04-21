@@ -2,27 +2,45 @@
 
     <!-- Paging -->
     <div class="d-flex align-items-center">
-        <span class="material-icons paging-arrow" (click)="changePageIndex(activePageIndex - 1)">arrow_back</span>
 
+        <!-- Prev -->
+        <span class="material-icons paging-arrow"
+              (click)="changePageIndex(activePageIndex - 1)">arrow_back</span>
+
+        <!-- Buttons -->
         <ng-container *ngFor="let pageIndex of pageList">
-            <button class="page-number-btn" [class.active-page-btn]="pageIndex == activePageIndex"
-                (click)="changePageIndex(pageIndex)">{{pageIndex + 1}}</button>
+
+            <button class="page-number-btn"
+                    [class.active-page-btn]="pageIndex == activePageIndex"
+                    (click)="changePageIndex(pageIndex)">
+                {{pageIndex + 1}}
+            </button>
+
         </ng-container>
 
-        <span class="material-icons paging-arrow" (click)="changePageIndex(activePageIndex + 1)">arrow_forward</span>
+        <!-- Next -->
+        <span class="material-icons paging-arrow"
+              (click)="changePageIndex(activePageIndex + 1)">arrow_forward</span>
     </div>
 
     <div class="flex-grow-1"></div>
 
     <!-- PageSize Items -->
     <div>
-        <button mat-stroked-button [matMenuTriggerFor]="pageSizeOptionMenu" class="pagesize-selector-btn">{{pageSize}}</button>
+        <button mat-stroked-button
+                [matMenuTriggerFor]="pageSizeOptionMenu"
+                class="pagesize-selector-btn">
+            {{pageSize}}
+        </button>
+
         <span class="mx-2">Items</span>
 
         <mat-menu #pageSizeOptionMenu="matMenu">
 
             <ng-container *ngFor="let pageSizeOption of pageSizeOptions">
+
                 <button mat-menu-item (click)="changePageSize(pageSizeOption)">{{pageSizeOption}}</button>
+
             </ng-container>
 
         </mat-menu>
