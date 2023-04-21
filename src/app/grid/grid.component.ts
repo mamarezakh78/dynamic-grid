@@ -56,6 +56,9 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
 
     dataCount: number = 0;
 
+    private sortedColumn: Column;
+    private sortDirection: 'asc' | 'desc' = 'asc';
+
     ngOnInit(): void {
     }
 
@@ -176,6 +179,9 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     getSearchFilteredData(searchFilteredData: any[]) {
         this.gridRowDataSource$ = of(searchFilteredData).pipe(
             map(dataList => {
+
+                console.log("getSearchFilteredData");
+                
                 this.dataCount = dataList.length;
 
                 return dataList.map(data => this.createGridRow(data));
@@ -183,6 +189,41 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
         )
 
         this.getFirstPage();
+    }
+
+    sort(column: Column) {
+        if (!column.hasSort) {
+            return
+        }
+
+        if (this.sortedColumn === column) {
+            // Toggle sort direction
+            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Set new sort column and direction
+            this.sortedColumn = column;
+            this.sortDirection = 'asc';
+        }
+
+        this.gridRowDataSource$ = this.gridRowDataSource$.pipe(
+            map(dataList => {
+                // Sort data based on the currently sorted column and sort direction
+                if (this.sortedColumn) {
+                    dataList = dataList.sort((a, b) => {
+                        const aVal = a.data[this.sortedColumn.key];
+                        const bVal = b.data[this.sortedColumn.key];
+                        if (aVal < bVal) return this.sortDirection === 'asc' ? -1 : 1;
+                        if (aVal > bVal) return this.sortDirection === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+                }
+
+                return dataList
+            })
+        )
+
+        const startIndexOfPage: number = this.pageIndex * this.pageSize;
+        this.filterRows(startIndexOfPage);
     }
 
 }

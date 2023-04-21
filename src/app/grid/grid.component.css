@@ -26,13 +26,23 @@
     min-height: 630px;
 }
 
-.table-container > table > thead > tr > th, .table-container > table > tbody > tr > td {
+.table-container>table>thead>tr>th,
+.table-container>table>tbody>tr>td {
     vertical-align: middle;
 }
 
-.table-container > table > tbody > tr > td {
+.table-container>table>tbody>tr>td {
     white-space: nowrap;
     overflow: hidden;
     max-width: 10px;
     text-overflow: ellipsis;
+}
+
+.sortable-column {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortable-column>span {
+    vertical-align: middle;
 }

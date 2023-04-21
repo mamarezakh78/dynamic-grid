@@ -10,6 +10,7 @@ export class Column {
     label: string;
     key: string;
     protected type: string;
+    hasSort: boolean;
 
     get columnType(): string {
         return this.type;

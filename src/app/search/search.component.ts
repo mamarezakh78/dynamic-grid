@@ -44,8 +44,6 @@ export class SearchComponent extends Destoryable {
                     return false;
                 })
 
-                console.log("Search");
-
                 return filteredData
             }),
             takeUntil(this.destroy$)

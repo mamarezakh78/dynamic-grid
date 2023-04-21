@@ -42,16 +42,20 @@
             <!-- Header -->
             <thead>
                 <tr>
-                    <th *ngIf="hasMultiselect">
+                    <th *ngIf="hasMultiselect" class="column">
                         <mat-checkbox color="primary"
                                       (change)="onChangeAllRowsCheckbox($event)">
                         </mat-checkbox>
                     </th>
 
-                    <th scope="col">Number</th>
+                    <th class="column" scope="col">Number</th>
 
-                    <th *ngFor="let column of columns">
-                        {{column.label}}
+                    <th class="column" *ngFor="let column of columns"
+                        [class.sortable-column]="column.hasSort"
+                        (click)="sort(column)">
+
+                        <span>{{column.label}}</span>
+                        <span *ngIf="column.hasSort" class="material-icons">swap_vert</span>
                     </th>
                 </tr>
             </thead>
@@ -110,7 +114,7 @@
                        [pageSize]="pageSize"
                        (onChangePage)="onChangePage($event)">
             </paginator>
-            
+
         </ng-container>
     </section>
 

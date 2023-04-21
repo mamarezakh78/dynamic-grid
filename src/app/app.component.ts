@@ -18,10 +18,10 @@ export class AppComponent {
     ]
 
     sampleColumns: Column[] = [
-        new Column({ label: "User ID", key: "userId" }),
-        new Column({ label: "Username", key: "username" }),
+        new Column({ label: "User ID", key: "userId", hasSort: true }),
+        new Column({ label: "Username", key: "username", hasSort: true }),
         new Column({ label: "Email", key: "email" }),
-        new Column({ label: "Phone", key: "phone" }),
+        new Column({ label: "Phone", key: "phone", hasSort: true }),
         new Column({ label: "Company", key: "company" }),
         new ActionColumn({
             label: "Action", actionList: [
