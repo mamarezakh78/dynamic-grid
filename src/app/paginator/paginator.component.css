@@ -1,0 +1,31 @@
+.page-number-btn {
+    color: #8a93b1;
+    font-size: 1rem;
+    margin: 0 0.25rem;
+}
+
+.active-page-btn {
+    color: #1f64fd;
+    border-bottom: 1px solid #1f64fd;
+}
+
+.paging-arrow {
+    color: #1f64fd;
+    border: 1px solid #1f64fd;
+    border-radius: 0.5rem;
+    padding: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 0 0.5rem;
+}
+
+.paging-arrow:hover {
+    background-color: #1f64fd;
+    color: #ffffff;
+    transition-duration: 0.3s;
+}
+
+.pagesize-selector-btn {
+    border-color: #1f64fd;
+    color: #8a93b1;
+}

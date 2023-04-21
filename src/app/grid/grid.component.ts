@@ -55,10 +55,11 @@ export class GridComponent implements OnInit, AfterViewInit {
         )
     }
 
-    onChangePage(pageIndex: number) {
-        this.pageIndex = pageIndex;
+    onChangePage(paginator: {pageIndex: number, pageSize: number}) {
+        this.pageIndex = paginator.pageIndex;
+        this.pageSize = paginator.pageSize;
 
-        const startIndexOfPage: number = pageIndex * this.pageSize;
+        const startIndexOfPage: number = this.pageIndex * this.pageSize;
 
         this.setFilterData(startIndexOfPage);
     }
