@@ -18,14 +18,13 @@
 
         <!-- Group Action -->
         <div>
-            <button mat-stroked-button color="primary" [matMenuTriggerFor]="groupAction" class="flex-row-reverse">
+            <button mat-stroked-button color="primary" [matMenuTriggerFor]="groupActionMenu" class="flex-row-reverse">
                 Group Action
                 <span class="material-icons">arrow_drop_down</span>
             </button>
 
-            <mat-menu #groupAction="matMenu">
-                <button mat-menu-item>Item 1</button>
-                <button mat-menu-item>Item 2</button>
+            <mat-menu #groupActionMenu="matMenu">
+                <button mat-menu-item *ngFor="let action of groupAction" (click)="action.onClick(multiSelctedRows)">{{action.label}}</button>
             </mat-menu>
         </div>
 
@@ -62,7 +61,25 @@
                     <td>{{i + 1 + pageIndex * pageSize}}</td>
 
                     <td *ngFor="let column of columns">
-                        {{row[column.key]}}
+
+                        <span *ngIf="column.columnType === 'text'">{{row[column.key]}}</span>
+
+                        <!-- Action Column -->
+                        <ng-container *ngIf="column.columnType === 'action'">
+
+                            <button mat-icon-button color="primary" [matMenuTriggerFor]="rowActionMenu"
+                                class="flex-row-reverse">
+                                <span class="material-icons">more_horiz</span>
+                            </button>
+
+                            <mat-menu #rowActionMenu="matMenu">
+                                <button mat-menu-item *ngFor="let action of column.actionList" (click)="action.onClick(row)">
+                                    {{action.label}}
+                                </button>
+                            </mat-menu>
+
+                        </ng-container>
+
                     </td>
 
                 </tr>

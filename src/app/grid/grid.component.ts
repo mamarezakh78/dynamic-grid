@@ -3,7 +3,7 @@ import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/cor
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Column } from './model/column.model';
+import { Column, ActionColumn, ActionOption as GridAction } from './model/column.model';
 import { Observable, map, skip, take } from 'rxjs';
 import { PaginatorComponent } from '../paginator/paginator.component';
 @Component({
@@ -23,15 +23,19 @@ export class GridComponent implements OnInit, AfterViewInit {
 
     @Input() title: string = "Title";
 
-    @Input() columns: Column[] = [];
-    
+    @Input() columns: (Column | any)[] = [];
+
     @Input() getDataSource: () => Observable<any[]>;
 
     @Input() hasMultiselect: boolean = true;
 
+    @Input() groupAction: GridAction[] = [];
+
     dataSource$: Observable<any[]>
 
     filterData$: Observable<any[]>;
+
+    multiSelctedRows: {};
 
     pageSize: number = 10;
     pageIndex: number = 0;
@@ -40,9 +44,16 @@ export class GridComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.dataSource$ = this.getDataSource();
+        this.initDataSource();
 
         this.getFirstPage();
+    }
+
+    initDataSource() {
+        this.dataSource$ = this.getDataSource()
+            .pipe(
+                map(data => data.map(row => row.rowId = Math.random()))
+            )
     }
 
     getFirstPage() {
@@ -55,7 +66,7 @@ export class GridComponent implements OnInit, AfterViewInit {
         )
     }
 
-    onChangePage(paginator: {pageIndex: number, pageSize: number}) {
+    onChangePage(paginator: { pageIndex: number, pageSize: number }) {
         this.pageIndex = paginator.pageIndex;
         this.pageSize = paginator.pageSize;
 

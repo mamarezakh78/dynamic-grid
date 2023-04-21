@@ -3,11 +3,17 @@ export class Column {
 
     constructor(data: Partial<Column>) {
         Object.assign(this, data);
+
+        this.type = "text";
     }
 
     label: string;
     key: string;
     protected type: string;
+
+    get columnType(): string {
+        return this.type;
+    }
 }
 
 
