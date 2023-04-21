@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActionColumn, ActionOption, Column } from './grid/model/column.model';
-import { Observable, delay, of, tap } from 'rxjs';
+import { Observable, delay, map, of, tap } from 'rxjs';
 import { IUser, SampleData } from './sampleData';
 import { GridComponent } from './grid/grid.component';
 
@@ -36,6 +36,19 @@ export class AppComponent {
         return of(SampleData.generateSampleUserData())
             .pipe(
                 delay(500),
+                map(res => {
+                    setTimeout(() => {
+                        res.push({
+                            userId: 95,
+                            username: "Mamareza",
+                            email: "mamareza@gmail.com",
+                            phone: "0935",
+                            company: "i4twins"
+                        })
+                    }, 5000);
+                    
+                    return res
+                }),
                 tap(() => console.log("Fetch Data"))
             )
     }

@@ -4,8 +4,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { Column, ActionOption as GridAction, GridRow } from './model/column.model';
-import { Observable, map, shareReplay, tap } from 'rxjs';
+import { Observable, ReplaySubject, map, of, shareReplay, tap } from 'rxjs';
 import { PaginatorComponent } from '../paginator/paginator.component';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 @Component({
     standalone: true,
     selector: 'grid',
@@ -17,6 +18,8 @@ import { PaginatorComponent } from '../paginator/paginator.component';
         MatButtonModule,
         MatCheckboxModule,
         PaginatorComponent,
+        FormsModule,
+        ReactiveFormsModule
     ]
 })
 export class GridComponent implements OnInit, AfterViewInit {
@@ -35,6 +38,8 @@ export class GridComponent implements OnInit, AfterViewInit {
 
     private dataSource$: Observable<GridRow[]>
 
+    private cachedData$: ReplaySubject<any[]> = new ReplaySubject(1);
+
     filterData$: Observable<GridRow[]>;
 
     multiSelectedRows: { [key: number]: any } = {};
@@ -44,27 +49,39 @@ export class GridComponent implements OnInit, AfterViewInit {
 
     dataCount: number = 0;
 
+    searchCtrl: FormControl = new FormControl("");
+
     ngOnInit(): void {
     }
 
     ngAfterViewInit() {
         this.initDataSource();
+    }
+
+    private initDataSource() {
+        this.setCachData();
+
+        this.dataSource$ = this.getMapDataSourceToGridRows();
 
         this.getFirstPage();
     }
 
-    private initDataSource() {
-        this.dataSource$ = this.getMapDataSourceToGridRows();
+    setCachData() {
+        this.getDataSource().subscribe(data => {
+            this.cachedData$.next(data);
+        })
     }
 
     private getMapDataSourceToGridRows(): Observable<GridRow[]> {
-        return this.getDataSource().pipe(
+        return this.cachedData$.pipe(
             shareReplay(),
             map(data => {
 
+                console.log("getMapDataSourceToGridRows");
+
                 this.dataCount = data.length;
 
-                return data.map(row => this.createGridRow(row))
+                return data.map(row => this.createGridRow(row));
             })
         )
     }
@@ -124,6 +141,8 @@ export class GridComponent implements OnInit, AfterViewInit {
     onChangeAllRowsCheckbox(event: MatCheckboxChange) {
         this.dataSource$.pipe(
             map(data => {
+                console.log("All Ckeck");
+
                 return data.map(row => {
                     row.rowSelected = event.checked;
 
@@ -135,8 +154,39 @@ export class GridComponent implements OnInit, AfterViewInit {
         ).subscribe();
 
         this.fetchFilterData(this.pageIndex * this.pageSize);
+    }
 
-        console.log(this.multiSelectedRows);
+    onKeypressSearch(event: KeyboardEvent) {
+        if (event.key == "Enter") {
+            this.search();
+        }
+    }
+
+    search() {
+        const searchValue = this.searchCtrl.value;
+
+        this.cachedData$.pipe(
+            map(data => {
+                const filteredData = data.filter(item => {
+
+                    for (const prop in item) {
+                        if (item[prop] && item[prop].toString().toLowerCase().includes(searchValue.toLowerCase())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
+
+                console.log("Search");
+
+                this.dataCount = filteredData.length;
+
+                return filteredData.map(row => this.createGridRow(row));
+            })
+        ).subscribe(filteredData => {
+            this.dataSource$ = of(filteredData);
+            this.getFirstPage();
+        });
     }
 
 }
