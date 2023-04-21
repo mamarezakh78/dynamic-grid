@@ -8,7 +8,10 @@
 
         <!-- Search -->
         <div class="search-containr">
-            <input type="text" placeholder="Search..." class="search-input p-2">
+            <input type="text"
+                   placeholder="Search..."
+                   class="search-input p-2">
+
             <button class="search-btn">
                 <span class="material-icons">search</span>
             </button>
@@ -18,13 +21,20 @@
 
         <!-- Group Action -->
         <div>
-            <button mat-stroked-button color="primary" [matMenuTriggerFor]="groupActionMenu" class="flex-row-reverse">
+            <button mat-stroked-button
+                    color="primary"
+                    [matMenuTriggerFor]="groupActionMenu"
+                    class="flex-row-reverse">
                 Group Action
                 <span class="material-icons">arrow_drop_down</span>
             </button>
 
             <mat-menu #groupActionMenu="matMenu">
-                <button mat-menu-item *ngFor="let action of groupAction" (click)="action.onClick(multiSelctedRows)">{{action.label}}</button>
+                <button mat-menu-item
+                        *ngFor="let action of groupAction"
+                        (click)="action.onClick()">
+                    {{action.label}}
+                </button>
             </mat-menu>
         </div>
 
@@ -39,7 +49,9 @@
             <thead>
                 <tr>
                     <th *ngIf="hasMultiselect">
-                        <mat-checkbox color="primary"></mat-checkbox>
+                        <mat-checkbox color="primary"
+                                      (change)="onChangeAllRowsCheckbox($event)">
+                        </mat-checkbox>
                     </th>
 
                     <th scope="col">Number</th>
@@ -55,25 +67,34 @@
                 <tr *ngFor="let row of filterData$ | async; let i = index">
 
                     <td *ngIf="hasMultiselect">
-                        <mat-checkbox color="primary"></mat-checkbox>
+                        <mat-checkbox color="primary"
+                                      (change)="onChangeRowCheckBox($event, row)"
+                                      [checked]="row.rowSelected">
+                        </mat-checkbox>
                     </td>
 
                     <td>{{i + 1 + pageIndex * pageSize}}</td>
 
                     <td *ngFor="let column of columns">
 
-                        <span *ngIf="column.columnType === 'text'">{{row[column.key]}}</span>
+                        <span *ngIf="column.columnType === 'text'">
+                            {{row.data[column.key]}}
+                        </span>
 
                         <!-- Action Column -->
                         <ng-container *ngIf="column.columnType === 'action'">
 
-                            <button mat-icon-button color="primary" [matMenuTriggerFor]="rowActionMenu"
-                                class="flex-row-reverse">
+                            <button mat-icon-button
+                                    color="primary"
+                                    [matMenuTriggerFor]="rowActionMenu"
+                                    class="flex-row-reverse">
                                 <span class="material-icons">more_horiz</span>
                             </button>
 
                             <mat-menu #rowActionMenu="matMenu">
-                                <button mat-menu-item *ngFor="let action of column.actionList" (click)="action.onClick(row)">
+                                <button mat-menu-item
+                                        *ngFor="let action of column.actionList"
+                                        (click)="action.onClick(row.data)">
                                     {{action.label}}
                                 </button>
                             </mat-menu>
@@ -89,9 +110,13 @@
     </section>
 
     <section class="mt-3">
-        <ng-container *ngIf="dataSource$ | async as dataSource">
-            <paginator [dataLength]="dataSource.length" [pageSize]="pageSize" (onChangePage)="onChangePage($event)">
+        <ng-container *ngIf="dataCount">
+
+            <paginator [dataLength]="dataCount"
+                       [pageSize]="pageSize"
+                       (onChangePage)="onChangePage($event)">
             </paginator>
+            
         </ng-container>
     </section>
 

@@ -31,7 +31,14 @@ export class ActionColumn extends Column {
 }
 
 
-export class ActionOption {
+export interface ActionOption {
     label: string;
-    onClick: (row: any) => any;
+    onClick: (row?: any) => any;
+}
+
+
+export interface GridRow {
+    data: any;
+    rowId: number;
+    rowSelected: boolean;
 }

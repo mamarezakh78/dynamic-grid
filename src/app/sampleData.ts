@@ -4,7 +4,7 @@ export class SampleData {
 
         let sampleData: IUser[] = [];
 
-        for (let i = 0; i < 78; i++) {
+        for (let i = 0; i < 30; i++) {
             const user: IUser = {
                 userId: i + 1,
                 username: "Mohamed Ahmed Nooh",

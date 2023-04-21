@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Column, ActionColumn, ActionOption as GridAction } from './model/column.model';
-import { Observable, map, skip, take } from 'rxjs';
+import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
+import { Column, ActionOption as GridAction, GridRow } from './model/column.model';
+import { Observable, map, shareReplay, tap } from 'rxjs';
 import { PaginatorComponent } from '../paginator/paginator.component';
 @Component({
     standalone: true,
@@ -16,7 +16,7 @@ import { PaginatorComponent } from '../paginator/paginator.component';
         MatMenuModule,
         MatButtonModule,
         MatCheckboxModule,
-        PaginatorComponent
+        PaginatorComponent,
     ]
 })
 export class GridComponent implements OnInit, AfterViewInit {
@@ -31,14 +31,18 @@ export class GridComponent implements OnInit, AfterViewInit {
 
     @Input() groupAction: GridAction[] = [];
 
-    dataSource$: Observable<any[]>
+    @Input() primaryKey: string;
 
-    filterData$: Observable<any[]>;
+    private dataSource$: Observable<GridRow[]>
 
-    multiSelctedRows: {};
+    filterData$: Observable<GridRow[]>;
+
+    multiSelectedRows: { [key: number]: any } = {};
 
     pageSize: number = 10;
     pageIndex: number = 0;
+
+    dataCount: number = 0;
 
     ngOnInit(): void {
     }
@@ -49,20 +53,53 @@ export class GridComponent implements OnInit, AfterViewInit {
         this.getFirstPage();
     }
 
-    initDataSource() {
-        this.dataSource$ = this.getDataSource()
-            .pipe(
-                map(data => data.map(row => row.rowId = Math.random()))
-            )
+    private initDataSource() {
+        this.dataSource$ = this.getMapDataSourceToGridRows();
     }
 
-    getFirstPage() {
-        this.setFilterData(0);
+    private getMapDataSourceToGridRows(): Observable<GridRow[]> {
+        return this.getDataSource().pipe(
+            shareReplay(),
+            map(data => {
+
+                this.dataCount = data.length;
+
+                return data.map(row => this.createGridRow(row))
+            })
+        )
     }
 
-    setFilterData(from: number) {
+    private createGridRow(row: any): GridRow {
+        return {
+            data: row,
+            rowId: row[this.primaryKey],
+            rowSelected: false
+        };
+    }
+
+    private getFirstPage() {
+        this.fetchFilterData(0);
+    }
+
+    private fetchFilterData(from: number) {
         this.filterData$ = this.dataSource$.pipe(
-            map(data => data.slice(from, from + this.pageSize))
+            map(data => {
+
+                const filteredList: GridRow[] = data.slice(from, from + this.pageSize);
+
+                filteredList.forEach(row => {
+                    if (this.multiSelectedRows[row.rowId]) {
+                        row.rowSelected = true;
+                        this.multiSelectedRows[row.rowId] = row;
+                    }
+                    else {
+                        row.rowSelected = false;
+                    }
+                })
+
+                return filteredList
+            }),
+            tap(r => console.log(r))
         )
     }
 
@@ -72,7 +109,34 @@ export class GridComponent implements OnInit, AfterViewInit {
 
         const startIndexOfPage: number = this.pageIndex * this.pageSize;
 
-        this.setFilterData(startIndexOfPage);
+        this.fetchFilterData(startIndexOfPage);
+    }
+
+    onChangeRowCheckBox(event: MatCheckboxChange, row: GridRow) {
+        if (event.checked) {
+            this.multiSelectedRows[row.rowId] = row.data;
+        }
+        else {
+            delete this.multiSelectedRows[row.rowId];
+        }
+    }
+
+    onChangeAllRowsCheckbox(event: MatCheckboxChange) {
+        this.dataSource$.pipe(
+            map(data => {
+                return data.map(row => {
+                    row.rowSelected = event.checked;
+
+                    this.onChangeRowCheckBox(event, row);
+
+                    return row
+                })
+            })
+        ).subscribe();
+
+        this.fetchFilterData(this.pageIndex * this.pageSize);
+
+        console.log(this.multiSelectedRows);
     }
 
 }
