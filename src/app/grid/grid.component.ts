@@ -69,7 +69,7 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     private initDataSource() {
         this.setCachData();
 
-        this.gridRowDataSource$ = this.getMappedDataToGridRows();
+        this.getGridRowData();
 
         this.getFirstPage();
     }
@@ -83,18 +83,46 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
             })
     }
 
-    private getMappedDataToGridRows(): Observable<GridRow[]> {
-        return this.cachedData$.pipe(
+    /**
+     * @param filterData filterData is an optional parameter that is array of 'Api Model' type.
+     *                   If "filterData" is provided, the method will use it to filter the cached data, otherwise, the cached data will be used.
+     * @returns 
+     * @description this method responsible for getting the data for a grid, filtering and sorting the data as needed,
+     *              and transforming the data into an array of "GridRow" objects that can be displayed in the grid.
+     */
+    private getGridRowData(filterData?: any[]): Observable<GridRow[]> {
+        const data$ = filterData ? of(filterData) : this.cachedData$;
+
+        return this.gridRowDataSource$ = data$.pipe(
             shareReplay(),
-            map(data => {
+            map(dataList => {
+                this.dataCount = dataList.length;
 
-                console.log("getMapDataSourceToGridRows");
+                const sortedDataList = this.getSortedData(dataList);
 
-                this.dataCount = data.length;
-
-                return data.map(row => this.createGridRow(row));
+                return this.mapDataToGridRow(sortedDataList);
             })
         )
+    }
+
+    private getSortedData(dataList: any[]): any[] {
+        if (this.sortedColumn) {
+            dataList = dataList.sort((a, b) => {
+                const aVal = a[this.sortedColumn.key];
+                const bVal = b[this.sortedColumn.key];
+
+                if (aVal < bVal) return this.sortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return this.sortDirection === 'asc' ? 1 : -1;
+
+                return 0;
+            });
+        }
+
+        return dataList;
+    }
+
+    private mapDataToGridRow(dataList: any[]): GridRow[] {
+        return dataList.map(row => this.createGridRow(row));
     }
 
     private createGridRow(row: any): GridRow {
@@ -112,14 +140,12 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     private filterRows(from: number) {
         this.filteredRows$ = this.gridRowDataSource$.pipe(
             map(data => {
-
                 const filteredList: GridRow[] = data.slice(from, from + this.pageSize);
 
                 this.setStateOfRowSelect(filteredList);
 
                 return filteredList
-            }),
-            tap(r => console.log(r))
+            })
         )
     }
 
@@ -139,6 +165,10 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
         this.pageIndex = paginator.pageIndex;
         this.pageSize = paginator.pageSize;
 
+        this.refreshCurrentPage();
+    }
+
+    private refreshCurrentPage() {
         const startIndexOfPage: number = this.pageIndex * this.pageSize;
 
         this.filterRows(startIndexOfPage);
@@ -153,11 +183,9 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
         }
     }
 
-    onChangeAllRowsCheckbox(event: MatCheckboxChange) {
-        this.gridRowDataSource$.pipe(
+    toggleSelectAllRows(event: MatCheckboxChange) {
+        this.getGridRowData().pipe(
             map(data => {
-                console.log("All Ckeck");
-
                 return data.map(row => {
                     row.rowSelected = event.checked;
 
@@ -167,9 +195,9 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
                 })
             }),
             takeUntil(this.destroy$)
-        ).subscribe();
+        ).subscribe()
 
-        this.filterRows(this.pageIndex * this.pageSize);
+        this.refreshCurrentPage();
     }
 
     /**
@@ -177,16 +205,7 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
      * @param searchFilteredData emitted filteredData from searchComponent
      */
     getSearchFilteredData(searchFilteredData: any[]) {
-        this.gridRowDataSource$ = of(searchFilteredData).pipe(
-            map(dataList => {
-
-                console.log("getSearchFilteredData");
-                
-                this.dataCount = dataList.length;
-
-                return dataList.map(data => this.createGridRow(data));
-            })
-        )
+        this.getGridRowData(searchFilteredData);
 
         this.getFirstPage();
     }
@@ -197,33 +216,23 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
         }
 
         if (this.sortedColumn === column) {
-            // Toggle sort direction
-            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+            this.toggleSortDirection();
         } else {
-            // Set new sort column and direction
-            this.sortedColumn = column;
-            this.sortDirection = 'asc';
+            this.setNewSortConfig(column);
         }
 
-        this.gridRowDataSource$ = this.gridRowDataSource$.pipe(
-            map(dataList => {
-                // Sort data based on the currently sorted column and sort direction
-                if (this.sortedColumn) {
-                    dataList = dataList.sort((a, b) => {
-                        const aVal = a.data[this.sortedColumn.key];
-                        const bVal = b.data[this.sortedColumn.key];
-                        if (aVal < bVal) return this.sortDirection === 'asc' ? -1 : 1;
-                        if (aVal > bVal) return this.sortDirection === 'asc' ? 1 : -1;
-                        return 0;
-                    });
-                }
+        this.getGridRowData();
 
-                return dataList
-            })
-        )
+        this.refreshCurrentPage();
+    }
 
-        const startIndexOfPage: number = this.pageIndex * this.pageSize;
-        this.filterRows(startIndexOfPage);
+    private toggleSortDirection() {
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    }
+
+    private setNewSortConfig(column: Column) {
+        this.sortedColumn = column;
+        this.sortDirection = 'asc';
     }
 
 }
