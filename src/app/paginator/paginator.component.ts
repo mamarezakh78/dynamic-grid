@@ -16,7 +16,18 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class PaginatorComponent implements OnInit {
 
-    @Input() dataLength: number;
+    private _dataLength: number = 0;
+    public get dataLength() : number {
+        return this._dataLength
+    }
+    
+    @Input()
+    public set dataLength(v : number) {
+        this._dataLength = v;
+
+        this.generatePageList();
+    }
+    
 
     @Input() pageSize: number;
 
@@ -35,6 +46,8 @@ export class PaginatorComponent implements OnInit {
     }
 
     generatePageList() {
+        this.pageList = [];
+        
         this.pageCount = Math.ceil(this.dataLength / this.pageSize);
 
         for (let i = 0; i < this.pageCount; i++) {
