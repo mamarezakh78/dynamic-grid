@@ -145,6 +145,8 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     }
 
     private getFirstPage() {
+        this.pageIndex = 0;
+        
         this.filterRows(0);
     }
 
