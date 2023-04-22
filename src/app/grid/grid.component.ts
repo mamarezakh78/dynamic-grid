@@ -45,9 +45,9 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
 
     private gridRowDataSource$: Observable<GridRow[]>
 
-    private cachedData$: Subject<any[]> = new Subject();
+    private cachedData$: ReplaySubject<any[]> = new ReplaySubject(1);
 
-    public get getCachedData(): Subject<any[]> {
+    public get getCachedData(): ReplaySubject<any[]> {
         return this.cachedData$;
     }
 
