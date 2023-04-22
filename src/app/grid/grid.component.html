@@ -8,7 +8,7 @@
 
         <!-- Search -->
         <ng-container *ngIf="hasSearch">
-            <search [dataSource]="cachedData$" (filterData)="getSearchFilteredData($event)"></search>
+            <search [dataSource]="getCachedData" (filterData)="getSearchFilteredData($event)"></search>
         </ng-container>
 
         <div class="flex-grow-1"></div>
@@ -70,7 +70,7 @@
 
             <!-- Body -->
             <tbody>
-                <tr *ngFor="let row of filteredRows$ | async; let i = index">
+                <tr *ngFor="let row of filteredRows$ | async; let i = index; trackBy: trackByFn">
 
                     <td *ngIf="hasMultiselect">
                         <mat-checkbox color="primary"

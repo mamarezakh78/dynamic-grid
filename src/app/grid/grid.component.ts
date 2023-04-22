@@ -4,7 +4,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { Column, ActionOption as GridAction, GridRow } from './model/column.model';
-import { Observable, ReplaySubject, map, of, shareReplay, takeUntil, tap } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, Subject, map, of, shareReplay, takeUntil, tap } from 'rxjs';
 import { PaginatorComponent } from '../paginator/paginator.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SearchComponent } from '../search/search.component';
@@ -45,7 +45,11 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
 
     private gridRowDataSource$: Observable<GridRow[]>
 
-    cachedData$: ReplaySubject<any[]> = new ReplaySubject(1);
+    private cachedData$: Subject<any[]> = new Subject();
+
+    public get getCachedData(): Subject<any[]> {
+        return this.cachedData$;
+    }
 
     filteredRows$: Observable<GridRow[]>;
 
@@ -59,10 +63,10 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     private sortedColumn: Column;
     private sortDirection: 'asc' | 'desc' = 'asc';
 
-    public get getSortedColumnKey() : string {
+    public get getSortedColumnKey(): string {
         return this.sortedColumn?.key;
     }
-    public get getSortDirection() : 'asc' | 'desc' {
+    public get getSortDirection(): 'asc' | 'desc' {
         return this.sortDirection;
     }
 
@@ -98,7 +102,7 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
      *              and transforming the data into an array of "GridRow" objects that can be displayed in the grid.
      */
     private getGridRowData(filterData?: any[]): Observable<GridRow[]> {
-        const data$ = filterData ? of(filterData) : this.cachedData$;
+        const data$ = filterData ? of(filterData) : this.cachedData$.asObservable();
 
         return this.gridRowDataSource$ = data$.pipe(
             shareReplay(),
@@ -240,6 +244,10 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     private setNewSortConfig(column: Column) {
         this.sortedColumn = column;
         this.sortDirection = 'asc';
+    }
+
+    trackByFn(idx: number, row: GridRow) {
+        return row.rowId;
     }
 
 }
