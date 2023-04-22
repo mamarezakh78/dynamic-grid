@@ -29,7 +29,7 @@ import { Destoryable } from '../tools/destroyable';
 })
 export class GridComponent extends Destoryable implements OnInit, AfterViewInit {
 
-    @Input() title: string = "Title";
+    @Input() gridTitle: string = "Title";
 
     @Input() columns: (Column | any)[] = [];
 
