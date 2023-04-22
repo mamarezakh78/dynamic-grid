@@ -164,7 +164,7 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
         filteredList.forEach(row => {
             if (this.multiSelectedRows[row.rowId]) {
                 row.rowSelected = true;
-                this.multiSelectedRows[row.rowId] = row;
+                this.multiSelectedRows[row.rowId] = row.data;
             }
             else {
                 row.rowSelected = false;
@@ -186,6 +186,8 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     }
 
     onChangeRowCheckBox(event: MatCheckboxChange, row: GridRow) {
+        row.rowSelected = event.checked;
+
         if (event.checked) {
             this.multiSelectedRows[row.rowId] = row.data;
         }
@@ -199,9 +201,9 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
             map(data => {
                 return data.map(row => {
                     row.rowSelected = event.checked;
-
+                    
                     this.onChangeRowCheckBox(event, row);
-
+                    
                     return row
                 })
             }),
