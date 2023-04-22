@@ -1,8 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActionColumn, ActionOption, Column } from './grid/model/column.model';
-import { Observable, delay, map, of, tap } from 'rxjs';
-import { IUser, SampleData } from './sampleData';
+import { Observable, delay, map } from 'rxjs';
 import { GridComponent } from './grid/grid.component';
+import { IUser, SampleService } from './services/sample.service';
 
 @Component({
     selector: 'app-root',
@@ -12,6 +12,10 @@ import { GridComponent } from './grid/grid.component';
 export class AppComponent {
 
     @ViewChild('grid') grid: GridComponent;
+
+    constructor(private sampleService: SampleService) {
+
+    }
 
     groupAction: ActionOption[] = [
         { label: "Delete", onClick: () => console.log(this.grid.multiSelectedRows) }
@@ -33,23 +37,22 @@ export class AppComponent {
     ]
 
     getDataFromApi = (): Observable<IUser[]> => {
-        return of(SampleData.generateSampleUserData())
-            .pipe(
-                delay(500),
-                map(res => {
-                    setTimeout(() => {
-                        res.push({
-                            userId: 95,
-                            username: "Mamareza",
-                            email: "mamareza@gmail.com",
-                            phone: "0935",
-                            company: "i4twins"
-                        })
-                    }, 5000);
-                    
-                    return res
-                }),
-                tap(() => console.log("Fetch Data"))
-            )
+        return this.sampleService.getSampleUserData().pipe(
+            delay(500),
+            map(res => {
+                setTimeout(() => {
+                    res.push({
+                        userId: 95,
+                        username: "Mamareza",
+                        email: "mamareza@gmail.com",
+                        phone: "0935",
+                        company: "i4twins"
+                    })
+                }, 5000);
+
+                return res
+            })
+        )
+
     }
 }

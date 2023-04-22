@@ -1,8 +1,22 @@
-export class SampleData {
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
 
-    static generateSampleUserData(): IUser[] {
+@Injectable({
+    providedIn: 'root'
+})
+export class SampleService {
 
-        let sampleData: IUser[] = [];
+    sampleData: IUser[] = [];
+
+    constructor() { }
+
+    getSampleUserData(): Observable<IUser[]> {
+        this.generateSampleUserData();
+
+        return of(this.sampleData);
+    }
+
+    private generateSampleUserData() {
 
         for (let i = 0; i < 27; i++) {
             const user: IUser = {
@@ -13,10 +27,8 @@ export class SampleData {
                 company: "VF DE, T-mobile, VF Cairo, CF Snapp"
             }
 
-            sampleData.push(user);
+            this.sampleData.push(user);
         }
-
-        return sampleData;
     }
 }
 
