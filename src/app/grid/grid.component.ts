@@ -59,6 +59,13 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     private sortedColumn: Column;
     private sortDirection: 'asc' | 'desc' = 'asc';
 
+    public get getSortedColumnKey() : string {
+        return this.sortedColumn?.key;
+    }
+    public get getSortDirection() : 'asc' | 'desc' {
+        return this.sortDirection;
+    }
+
     ngOnInit(): void {
     }
 
