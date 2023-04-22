@@ -10,8 +10,6 @@ export class Destoryable {
     protected destroy$ = new Subject();
 
     ngOnDestroy() {
-        console.log("destr");
-        
         this.destroy$.next('');
         this.destroy$.complete();
     }

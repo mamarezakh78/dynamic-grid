@@ -102,7 +102,7 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
      *              and transforming the data into an array of "GridRow" objects that can be displayed in the grid.
      */
     private getGridRowData(filterData?: any[]): Observable<GridRow[]> {
-        const data$ = filterData ? of(filterData) : this.cachedData$.asObservable();
+        const data$ = filterData ? of(filterData) : this.cachedData$;
 
         return this.gridRowDataSource$ = data$.pipe(
             shareReplay(),
