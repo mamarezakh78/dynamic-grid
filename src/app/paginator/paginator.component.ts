@@ -31,6 +31,8 @@ export class PaginatorComponent implements OnInit {
 
     @Input() pageSize: number;
 
+    @Input() activePageIndex: number = 0;
+
     @Output() onChangePage = new EventEmitter<{ pageIndex: number, pageSize: number }>();
 
     pageSizeOptions: number[] = [10, 25, 50, 100];
@@ -39,7 +41,6 @@ export class PaginatorComponent implements OnInit {
 
     pageCount: number;
 
-    activePageIndex: number = 0;
 
     ngOnInit(): void {
         this.generatePageList();
