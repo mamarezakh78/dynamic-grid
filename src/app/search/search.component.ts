@@ -30,10 +30,15 @@ export class SearchComponent extends Destoryable {
     }
 
     search() {
-        const searchValue = this.searchCtrl.value;
+        const searchValue: string = this.searchCtrl.value;
 
         this.dataSource.pipe(
             map(data => {
+                if (searchValue.length == 0) {
+                    this.filterData.emit(data)
+                    return
+                }
+
                 const filteredData = data.filter(item => {
 
                     for (const prop in item) {

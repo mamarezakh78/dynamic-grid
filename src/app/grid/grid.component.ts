@@ -60,6 +60,8 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
 
     dataCount: number = 0;
 
+    searchFilteredData: any[] = [];
+
     private sortedColumn: Column;
     private sortDirection: 'asc' | 'desc' = 'asc';
 
@@ -95,18 +97,16 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     }
 
     /**
-     * @param filterData filterData is an optional parameter that is array of 'Api Model' type.
-     *                   If "filterData" is provided, the method will use it to filter the cached data, otherwise, the cached data will be used.
-     * @returns 
      * @description this method responsible for getting the data for a grid, filtering and sorting the data as needed,
      *              and transforming the data into an array of "GridRow" objects that can be displayed in the grid.
      */
-    private getGridRowData(filterData?: any[]): Observable<GridRow[]> {
-        const data$ = filterData ? of(filterData) : this.cachedData$;
+    private getGridRowData(): Observable<GridRow[]> {
+        const data$ = this.searchFilteredData?.length > 0 ? of(this.searchFilteredData) : this.cachedData$;
 
         return this.gridRowDataSource$ = data$.pipe(
             shareReplay(),
             map(dataList => {
+
                 this.dataCount = dataList.length;
 
                 const sortedDataList = this.getSortedData(dataList);
@@ -218,7 +218,9 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
      * @param searchFilteredData emitted filteredData from searchComponent
      */
     getSearchFilteredData(searchFilteredData: any[]) {
-        this.getGridRowData(searchFilteredData);
+        this.searchFilteredData = searchFilteredData;
+
+        this.getGridRowData();
 
         this.getFirstPage();
     }
