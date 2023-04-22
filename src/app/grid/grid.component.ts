@@ -45,7 +45,11 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
 
     private gridRowDataSource$: Observable<GridRow[]>
 
-    cachedData$: ReplaySubject<any[]> = new ReplaySubject(1);
+    private cachedData$: ReplaySubject<any[]> = new ReplaySubject(1);
+
+    public get getCachedData(): ReplaySubject<any[]> {
+        return this.cachedData$;
+    }
 
     filteredRows$: Observable<GridRow[]>;
 
@@ -59,10 +63,10 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     private sortedColumn: Column;
     private sortDirection: 'asc' | 'desc' = 'asc';
 
-    public get getSortedColumnKey() : string {
+    public get getSortedColumnKey(): string {
         return this.sortedColumn?.key;
     }
-    public get getSortDirection() : 'asc' | 'desc' {
+    public get getSortDirection(): 'asc' | 'desc' {
         return this.sortDirection;
     }
 
@@ -240,6 +244,10 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     private setNewSortConfig(column: Column) {
         this.sortedColumn = column;
         this.sortDirection = 'asc';
+    }
+
+    trackByFn(idx: number, row: GridRow) {
+        return row.rowId;
     }
 
 }
