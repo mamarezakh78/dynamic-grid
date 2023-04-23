@@ -8,7 +8,7 @@
 
         <!-- Search -->
         <ng-container *ngIf="hasSearch">
-            <search [dataSource]="getCachedData" (filterData)="getSearchFilteredData($event)"></search>
+            <search (searchValue)="getSearchValue($event)"></search>
         </ng-container>
 
         <div class="flex-grow-1"></div>
@@ -44,9 +44,7 @@
                 <tr>
                     <!-- MultiSelect Column -->
                     <th *ngIf="hasMultiselect" class="column">
-                        <mat-checkbox color="primary"
-                                      (change)="toggleSelectAllRows($event)">
-                        </mat-checkbox>
+                        <mat-checkbox color="primary"(change)="toggleSelectAllRows($event)"></mat-checkbox>
                     </th>
 
                     <!-- Index Column -->
@@ -70,7 +68,7 @@
 
             <!-- Body -->
             <tbody>
-                <tr *ngFor="let row of filteredRows$ | async; let i = index; trackBy: trackByFn">
+                <tr *ngFor="let row of filteredRows; let i = index; trackBy: trackByFn">
 
                     <td *ngIf="hasMultiselect">
                         <mat-checkbox color="primary"

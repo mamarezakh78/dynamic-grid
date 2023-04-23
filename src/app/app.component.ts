@@ -1,9 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActionColumn, ActionOption, Column } from './grid/model/column.model';
-import { Observable, delay, map } from 'rxjs';
 import { GridComponent } from './grid/grid.component';
 import { SampleService } from './services/sample.service';
-import { IUser } from './interfaces/user.interface';
+import { IFilterApiParam } from './interfaces/user.interface';
 
 @Component({
     selector: 'app-root',
@@ -19,7 +18,7 @@ export class AppComponent {
     }
 
     groupAction: ActionOption[] = [
-        { label: "Delete", onClick: () => console.log(this.grid.multiSelectedRows) }
+        { label: "Delete", onClick: () => console.log(this.grid.getSelectedRowsData()) }
     ]
 
     sampleColumns: Column[] = [
@@ -37,23 +36,7 @@ export class AppComponent {
         }),
     ]
 
-    getDataFromApi = (): Observable<IUser[]> => {
-        return this.sampleService.getSampleUserData().pipe(
-            delay(500),
-            map(res => {
-                setTimeout(() => {
-                    res.push({
-                        userId: 95,
-                        username: "Mamareza",
-                        email: "mamareza@gmail.com",
-                        phone: "0935",
-                        company: "i4twins"
-                    })
-                }, 5000);
-
-                return res
-            })
-        )
-
+    getDataFromApi = <IUser>(apiParam: IFilterApiParam): any => {
+        return this.sampleService.baseFilterService<IUser>(apiParam);
     }
 }

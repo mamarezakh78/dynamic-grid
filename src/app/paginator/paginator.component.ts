@@ -27,7 +27,6 @@ export class PaginatorComponent implements OnInit {
 
         this.generatePageList();
     }
-    
 
     @Input() pageSize: number;
 
@@ -75,11 +74,11 @@ export class PaginatorComponent implements OnInit {
 
         this.pageList = [];
 
-        this.activePageIndex = null as any;
-
         this.generatePageList();
 
         this.changePageIndex(0);
+
+        this.onChangePage.emit({ pageIndex: this.activePageIndex, pageSize: this.pageSize });
     }
 
 

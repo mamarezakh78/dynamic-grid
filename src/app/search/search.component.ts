@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Observable, debounceTime, distinctUntilChanged, map, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { Destoryable } from '../tools/destroyable';
 
 @Component({
@@ -17,9 +17,11 @@ import { Destoryable } from '../tools/destroyable';
 })
 export class SearchComponent extends Destoryable implements OnInit {
 
-    @Input() dataSource: Observable<any[]>
+    // @Input() dataSource: Observable<any[]>
 
-    @Output() filterData = new EventEmitter<any[]>();
+    // @Output() filterData = new EventEmitter<any[]>();
+
+    @Output() searchValue = new EventEmitter<string>();
 
     searchCtrl: FormControl = new FormControl("");
 
@@ -43,35 +45,7 @@ export class SearchComponent extends Destoryable implements OnInit {
     }
 
     search() {
-        this.dataSource.pipe(
-            map(data => {
-
-                const filteredData = this.getFilteredDataBySearchValue(data);
-
-                return filteredData
-            }),
-            takeUntil(this.destroy$)
-        ).subscribe(data => {
-            this.filterData.emit(data);
-        })
+        this.searchValue.emit(this.searchCtrl.value);
     }
 
-    getFilteredDataBySearchValue(data: any[]): any[] {
-        const searchValue: string = this.searchCtrl.value;
-
-        if (searchValue.length == 0) {
-            this.filterData.emit(data)
-            return data
-        }
-
-        return data.filter(item => {
-
-            for (const prop in item) {
-                if (item[prop] && item[prop].toString().toLowerCase().includes(searchValue.toLowerCase())) {
-                    return true;
-                }
-            }
-            return false;
-        })
-    }
 }

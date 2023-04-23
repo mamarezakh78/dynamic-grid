@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Input } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { Column, ActionOption as GridAction, GridRow } from './model/column.model';
-import { Observable, ReplaySubject, map, of, shareReplay, takeUntil } from 'rxjs';
+import { Observable, map, takeUntil } from 'rxjs';
 import { PaginatorComponent } from '../paginator/paginator.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SearchComponent } from '../search/search.component';
 import { Destoryable } from '../tools/destroyable';
+import { IFilterApiParam, IFilterApiResponse } from '../interfaces/user.interface';
 
 @Component({
     standalone: true,
@@ -33,7 +34,7 @@ export class GridComponent extends Destoryable implements AfterViewInit {
 
     @Input() columns: (Column | any)[] = [];
 
-    @Input() getDataSource: () => Observable<any[]>;
+    @Input() getDataSource: (apiParam: IFilterApiParam) => Observable<IFilterApiResponse<any>>;
 
     @Input() hasMultiselect: boolean = true;
 
@@ -43,24 +44,16 @@ export class GridComponent extends Destoryable implements AfterViewInit {
 
     @Input() primaryKey: string;
 
-    private gridRowDataSource$: Observable<GridRow[]>
+    filteredRows: GridRow[];
 
-    private cachedData$: ReplaySubject<any[]> = new ReplaySubject(1);
-
-    public get getCachedData(): ReplaySubject<any[]> {
-        return this.cachedData$;
-    }
-
-    filteredRows$: Observable<GridRow[]>;
-
-    multiSelectedRows: { [key: number]: any } = {};
+    private multiSelectedRows: Map<number, GridRow> = new Map<number, GridRow>();
 
     pageSize: number = 10;
     pageIndex: number = 0;
 
     dataCount: number = 0;
 
-    searchFilteredData: any[];
+    isCheckAll: boolean = false;
 
     private sortedColumn: Column;
     private sortDirection: 'asc' | 'desc' = 'asc';
@@ -72,65 +65,50 @@ export class GridComponent extends Destoryable implements AfterViewInit {
         return this.sortDirection;
     }
 
+    constructor(private cdkRef: ChangeDetectorRef) {
+        super();
+    }
+
     ngAfterViewInit() {
-        this.initDataSource();
+        this.getData();
     }
 
-    private initDataSource() {
-        this.setCachData();
+    private getData(filterVaue?: string) {
 
-        this.getGridRowData();
+        const apiParam: IFilterApiParam = this.getApiParams(filterVaue);
 
-        this.getFirstPage();
-    }
-
-    private setCachData() {
-        this.getDataSource()
+        this.getDataSource(apiParam)
             .pipe(
-                takeUntil(this.destroy$)
+                takeUntil(this.destroy$),
+                map(data => {
+                    this.dataCount = data.dataCount;
+
+                    return data.data
+                })
             ).subscribe(data => {
-                this.cachedData$.next(data);
+                this.filteredRows = this.mapDataToGridRow(data);
+                this.cdkRef.detectChanges();
             })
     }
 
-    /**
-     * @description this method responsible for getting the data for a grid, filtering and sorting the data as needed,
-     *              and transforming the data into an array of "GridRow" objects that can be displayed in the grid.
-     */
-    private getGridRowData(): Observable<GridRow[]> {
-        const data$ = this.searchFilteredData ? of(this.searchFilteredData) : this.cachedData$;
-
-        return this.gridRowDataSource$ = data$.pipe(
-            shareReplay(),
-            map(dataList => {
-
-                this.dataCount = dataList.length;
-
-                const sortedDataList = this.getSortedData(dataList);
-
-                return this.mapDataToGridRow(sortedDataList);
-            })
-        )
-    }
-
-    private getSortedData(dataList: any[]): any[] {
-        if (this.sortedColumn) {
-            dataList = dataList.sort((a, b) => {
-                const aVal = a[this.sortedColumn.key];
-                const bVal = b[this.sortedColumn.key];
-
-                if (aVal < bVal) return this.sortDirection === 'asc' ? -1 : 1;
-                if (aVal > bVal) return this.sortDirection === 'asc' ? 1 : -1;
-
-                return 0;
-            });
+    private getApiParams(filterVaue?: string): IFilterApiParam {
+        return {
+            skip: this.pageIndex * this.pageSize,
+            top: this.pageSize,
+            filterValue: filterVaue || "",
+            orderKey: this.sortedColumn?.key,
+            orderDirection: this.sortDirection
         }
-
-        return dataList;
     }
 
     private mapDataToGridRow(dataList: any[]): GridRow[] {
-        return dataList.map(row => this.createGridRow(row));
+        return dataList.map(row => {
+            let gridRow = this.createGridRow(row);
+
+            gridRow.rowSelected = this.setStateOfRowSelect(gridRow);
+
+            return gridRow
+        });
     }
 
     private createGridRow(row: any): GridRow {
@@ -141,87 +119,56 @@ export class GridComponent extends Destoryable implements AfterViewInit {
         };
     }
 
-    private getFirstPage() {
-        this.pageIndex = 0;
-        
-        this.filterRows(0);
+    private setStateOfRowSelect(row: GridRow): boolean {
+        if (this.multiSelectedRows.has(row.rowId)) {
+            row.rowSelected = this.multiSelectedRows.get(row.rowId)?.rowSelected;
+            this.multiSelectedRows.set(row.rowId, row);
+        }
+        else if (this.isCheckAll && !this.multiSelectedRows.has(row.rowId)) {
+            row.rowSelected = true;
+            this.multiSelectedRows.set(row.rowId, row);
+        } else {
+            row.rowSelected = false;
+        }
+
+        return row.rowSelected || false
     }
 
-    private filterRows(from: number) {
-        this.filteredRows$ = this.gridRowDataSource$.pipe(
-            map(data => {
-                const filteredList: GridRow[] = data.slice(from, from + this.pageSize);
-
-                this.setStateOfRowSelect(filteredList);
-
-                return filteredList
-            })
-        )
-    }
-
-    private setStateOfRowSelect(filteredList: GridRow[]) {
-        filteredList.forEach(row => {
-            if (this.multiSelectedRows[row.rowId]) {
-                row.rowSelected = true;
-                this.multiSelectedRows[row.rowId] = row.data;
-            }
-            else {
-                row.rowSelected = false;
-            }
-        })
+    getSelectedRowsData(): GridRow[] {
+        return [...this.multiSelectedRows.values()]
+            .filter((row: GridRow) => row.rowSelected)
+            .map(row => row.data);
     }
 
     onChangePage(paginator: { pageIndex: number, pageSize: number }) {
         this.pageIndex = paginator.pageIndex;
         this.pageSize = paginator.pageSize;
 
-        this.refreshCurrentPage();
-    }
-
-    private refreshCurrentPage() {
-        const startIndexOfPage: number = this.pageIndex * this.pageSize;
-
-        this.filterRows(startIndexOfPage);
+        this.getData();
     }
 
     onChangeRowCheckBox(event: MatCheckboxChange, row: GridRow) {
         row.rowSelected = event.checked;
 
-        if (event.checked) {
-            this.multiSelectedRows[row.rowId] = row.data;
-        }
-        else {
-            delete this.multiSelectedRows[row.rowId];
-        }
+        this.multiSelectedRows.set(row.rowId, row);
     }
 
     toggleSelectAllRows(event: MatCheckboxChange) {
-        this.getGridRowData().pipe(
-            map(data => {
-                return data.map(row => {
-                    row.rowSelected = event.checked;
-                    
-                    this.onChangeRowCheckBox(event, row);
-                    
-                    return row
-                })
-            }),
-            takeUntil(this.destroy$)
-        ).subscribe()
+        if (!event.checked) {
+            this.multiSelectedRows.clear();
+        }
 
-        this.refreshCurrentPage();
+        this.isCheckAll = event.checked;
+
+        this.filteredRows.forEach(row => {
+            this.onChangeRowCheckBox(event, row);
+        })
     }
 
-    /**
-     * 
-     * @param searchFilteredData emitted filteredData from searchComponent
-     */
-    getSearchFilteredData(searchFilteredData: any[]) {
-        this.searchFilteredData = searchFilteredData;
+    getSearchValue(searchValue: string) {
+        this.pageIndex = 0;
 
-        this.getGridRowData();
-
-        this.getFirstPage();
+        this.getData(searchValue)
     }
 
     onColumnHeaderClick(column: Column) {
@@ -235,9 +182,7 @@ export class GridComponent extends Destoryable implements AfterViewInit {
             this.setNewSortConfig(column);
         }
 
-        this.getGridRowData();
-
-        this.refreshCurrentPage();
+        this.getData();
     }
 
     private toggleSortDirection() {

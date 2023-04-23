@@ -41,5 +41,5 @@ export interface ActionOption {
 export interface GridRow {
     data: any;
     rowId: number;
-    rowSelected: boolean;
+    rowSelected?: boolean;
 }
