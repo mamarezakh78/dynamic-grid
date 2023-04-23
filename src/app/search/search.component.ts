@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Observable, map, takeUntil } from 'rxjs';
+import { Observable, debounceTime, distinct, distinctUntilChanged, map, startWith, takeUntil } from 'rxjs';
 import { Destoryable } from '../tools/destroyable';
 
 @Component({
@@ -15,13 +15,26 @@ import { Destoryable } from '../tools/destroyable';
         CommonModule
     ]
 })
-export class SearchComponent extends Destoryable {
+export class SearchComponent extends Destoryable implements OnInit {
 
     @Input() dataSource: Observable<any[]>
 
     @Output() filterData = new EventEmitter<any[]>();
 
     searchCtrl: FormControl = new FormControl("");
+
+    ngOnInit(): void {
+        this.listenOnSearchInput();
+    }
+
+    listenOnSearchInput() {
+        this.searchCtrl.valueChanges.pipe(
+            debounceTime(600),
+            distinctUntilChanged()
+        ).subscribe(() => {
+            this.search();
+        })
+    }
 
     onKeypressSearch(event: KeyboardEvent) {
         if (event.key == "Enter") {

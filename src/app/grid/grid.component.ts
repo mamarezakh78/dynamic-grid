@@ -60,7 +60,7 @@ export class GridComponent extends Destoryable implements AfterViewInit {
 
     dataCount: number = 0;
 
-    searchFilteredData: any[] = [];
+    searchFilteredData: any[];
 
     private sortedColumn: Column;
     private sortDirection: 'asc' | 'desc' = 'asc';
@@ -98,7 +98,7 @@ export class GridComponent extends Destoryable implements AfterViewInit {
      *              and transforming the data into an array of "GridRow" objects that can be displayed in the grid.
      */
     private getGridRowData(): Observable<GridRow[]> {
-        const data$ = this.searchFilteredData?.length > 0 ? of(this.searchFilteredData) : this.cachedData$;
+        const data$ = this.searchFilteredData ? of(this.searchFilteredData) : this.cachedData$;
 
         return this.gridRowDataSource$ = data$.pipe(
             shareReplay(),
