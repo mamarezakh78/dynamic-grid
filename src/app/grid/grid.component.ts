@@ -27,7 +27,7 @@ import { Destoryable } from '../tools/destroyable';
         Destoryable
     ]
 })
-export class GridComponent extends Destoryable implements OnInit, AfterViewInit {
+export class GridComponent extends Destoryable implements AfterViewInit {
 
     @Input() gridTitle: string = "Title";
 
@@ -70,9 +70,6 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
     }
     public get getSortDirection(): 'asc' | 'desc' {
         return this.sortDirection;
-    }
-
-    ngOnInit(): void {
     }
 
     ngAfterViewInit() {
@@ -227,7 +224,7 @@ export class GridComponent extends Destoryable implements OnInit, AfterViewInit 
         this.getFirstPage();
     }
 
-    sort(column: Column) {
+    onColumnHeaderClick(column: Column) {
         if (!column.hasSort) {
             return
         }

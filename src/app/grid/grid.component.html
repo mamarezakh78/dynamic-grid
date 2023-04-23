@@ -1,10 +1,10 @@
-<section class="grid-container">
+<section class="grid-container h-100">
 
     <!-- Title -->
-    <h2 class="title">{{gridTitle}}</h2>
+    <h2 class="title m-0">{{gridTitle}}</h2>
 
     <!-- Top Tools -->
-    <section class="top-tools-container">
+    <section class="top-tools-container flex-wrap gap-2">
 
         <!-- Search -->
         <ng-container *ngIf="hasSearch">
@@ -35,7 +35,7 @@
     </section>
 
     <!-- Table  ------------------------------------------------------------------------------------------>
-    <section class="table-container mt-3">
+    <section class="table-container mt-3 overflow-auto">
 
         <table class="table table-hover m-0">
 
@@ -55,14 +55,14 @@
                     <!-- Columns -->
                     <th class="column" *ngFor="let column of columns"
                         [class.sortable-column]="column.hasSort"
-                        (click)="sort(column)">
+                        (click)="onColumnHeaderClick(column)">
 
                         <!-- Label -->
                         <span>{{column.label}}</span>
 
                         <!-- Sort Icon -->
                         <span *ngIf="column.hasSort" class="material-icons">
-                            {{(getSortedColumnKey == column.key) ? (getSortDirection == 'asc' ? 'arrow_drop_up' : 'arrow_drop_down') : 'import_export'}}
+                            {{getSortedColumnKey == column.key ? (getSortDirection == 'asc' ? 'arrow_drop_up' : 'arrow_drop_down') : 'import_export'}}
                         </span>
                     </th>
                 </tr>
@@ -115,7 +115,7 @@
         </table>
     </section>
 
-    <section class="mt-3">
+    <section class="mt-3 position-sticky bottom-0 bg-white">
         <ng-container *ngIf="dataCount">
 
             <paginator [dataLength]="dataCount"

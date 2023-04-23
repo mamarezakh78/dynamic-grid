@@ -18,7 +18,7 @@ export class SampleService {
 
     private generateSampleUserData() {
 
-        for (let i = 0; i < 27; i++) {
+        for (let i = 0; i < 33; i++) {
             const user: IUser = {
                 userId: i + 1,
                 username: "Mohamed Ahmed Nooh",
