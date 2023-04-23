@@ -43,30 +43,35 @@ export class SearchComponent extends Destoryable implements OnInit {
     }
 
     search() {
-        const searchValue: string = this.searchCtrl.value;
-
         this.dataSource.pipe(
             map(data => {
-                if (searchValue.length == 0) {
-                    this.filterData.emit(data)
-                    return
-                }
 
-                const filteredData = data.filter(item => {
-
-                    for (const prop in item) {
-                        if (item[prop] && item[prop].toString().toLowerCase().includes(searchValue.toLowerCase())) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })
+                const filteredData = this.getFilteredDataBySearchValue(data);
 
                 return filteredData
             }),
             takeUntil(this.destroy$)
         ).subscribe(data => {
             this.filterData.emit(data);
+        })
+    }
+
+    getFilteredDataBySearchValue(data: any[]): any[] {
+        const searchValue: string = this.searchCtrl.value;
+
+        if (searchValue.length == 0) {
+            this.filterData.emit(data)
+            return data
+        }
+
+        return data.filter(item => {
+
+            for (const prop in item) {
+                if (item[prop] && item[prop].toString().toLowerCase().includes(searchValue.toLowerCase())) {
+                    return true;
+                }
+            }
+            return false;
         })
     }
 }
