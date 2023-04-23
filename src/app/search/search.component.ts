@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Observable, debounceTime, distinct, distinctUntilChanged, map, startWith, takeUntil } from 'rxjs';
+import { Observable, debounceTime, distinctUntilChanged, map, takeUntil } from 'rxjs';
 import { Destoryable } from '../tools/destroyable';
 
 @Component({

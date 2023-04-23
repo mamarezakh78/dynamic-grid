@@ -2,7 +2,8 @@ import { Component, ViewChild } from '@angular/core';
 import { ActionColumn, ActionOption, Column } from './grid/model/column.model';
 import { Observable, delay, map } from 'rxjs';
 import { GridComponent } from './grid/grid.component';
-import { IUser, SampleService } from './services/sample.service';
+import { SampleService } from './services/sample.service';
+import { IUser } from './interfaces/user.interface';
 
 @Component({
     selector: 'app-root',

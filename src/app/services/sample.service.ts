@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { IUser } from '../interfaces/user.interface';
 
 @Injectable({
     providedIn: 'root'
@@ -11,12 +12,11 @@ export class SampleService {
     constructor() { }
 
     getSampleUserData(): Observable<IUser[]> {
-        this.generateSampleUserData();
-
-        return of(this.sampleData);
+        return of(this.generateSampleUserData());
     }
 
-    private generateSampleUserData() {
+    private generateSampleUserData(): IUser[] {
+        const sampleData: IUser[] = [];
 
         for (let i = 0; i < 33; i++) {
             const user: IUser = {
@@ -29,14 +29,7 @@ export class SampleService {
 
             this.sampleData.push(user);
         }
+
+        return sampleData
     }
-}
-
-
-export interface IUser {
-    userId: number;
-    username: string;
-    email: string;
-    phone: string;
-    company: string;
 }
