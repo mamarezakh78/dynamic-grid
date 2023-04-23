@@ -2,7 +2,9 @@ import { Component, ViewChild } from '@angular/core';
 import { ActionColumn, ActionOption, Column } from './grid/model/column.model';
 import { GridComponent } from './grid/grid.component';
 import { SampleService } from './services/sample.service';
-import { IFilterApiParam } from './interfaces/user.interface';
+import { Observable, of } from 'rxjs';
+import { IFilterPageParam, IFilterPageResponse } from './grid/model/client-side-paging.model';
+import { IUser } from './interfaces/user.interface';
 
 @Component({
     selector: 'app-root',
@@ -36,7 +38,9 @@ export class AppComponent {
         }),
     ]
 
-    getDataFromApi = <IUser>(apiParam: IFilterApiParam): any => {
+    getDataFromApi = (apiParam: IFilterPageParam): Observable<IFilterPageResponse<IUser>> => {
         return this.sampleService.baseFilterService<IUser>(apiParam);
     }
+
+    getStaticData = () => of(this.sampleService.generateSampleUserData());
 }

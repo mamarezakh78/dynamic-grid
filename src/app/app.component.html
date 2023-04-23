@@ -3,6 +3,8 @@
           gridTitle="Workspace List"
           primaryKey="userId"
           [columns]="sampleColumns"
+          [isClientSidePaging]="false"
+          [clientSidePagingDataSource]="getStaticData"
           [getDataSource]="getDataFromApi"
           [groupAction]="groupAction">
     </grid>
