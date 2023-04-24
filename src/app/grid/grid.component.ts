@@ -103,7 +103,9 @@ export class GridComponent extends Destoryable implements AfterViewInit {
 
         let data$: Observable<any> = this.isClientSidePaging ? ClientSidePaging.paging(this.cachedData$, apiParam) : this.getDataSource(apiParam);
 
-        this.isWait = true;
+        if (!this.isClientSidePaging) {
+            this.isWait = true;
+        }
 
         data$.pipe(
             takeUntil(this.destroy$),
