@@ -37,6 +37,10 @@
     <!-- Table  ------------------------------------------------------------------------------------------>
     <section class="table-container mt-3 overflow-auto">
 
+        <ng-container *ngIf="isWait">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </ng-container>
+
         <table class="table table-hover m-0">
 
             <!-- Header -->

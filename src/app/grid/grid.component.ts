@@ -4,13 +4,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { Column, ActionOption as GridAction, GridRow } from './model/column.model';
-import { Observable, ReplaySubject, map, takeUntil } from 'rxjs';
+import { Observable, ReplaySubject, finalize, map, takeUntil } from 'rxjs';
 import { PaginatorComponent } from '../paginator/paginator.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SearchComponent } from '../search/search.component';
 import { Destoryable } from '../tools/destroyable';
 import { ClientSidePaging, IFilterPageResponse, IFilterPageParam } from './model/client-side-paging.model';
-
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
     standalone: true,
@@ -26,7 +26,8 @@ import { ClientSidePaging, IFilterPageResponse, IFilterPageParam } from './model
         FormsModule,
         ReactiveFormsModule,
         SearchComponent,
-        Destoryable
+        Destoryable,
+        MatProgressBarModule
     ]
 })
 export class GridComponent extends Destoryable implements AfterViewInit {
@@ -55,6 +56,8 @@ export class GridComponent extends Destoryable implements AfterViewInit {
     pageIndex: number = 0;
 
     dataCount: number = 0;
+
+    isWait: boolean = false;
 
     private cachedData$: ReplaySubject<any> = new ReplaySubject(1);
 
@@ -100,13 +103,16 @@ export class GridComponent extends Destoryable implements AfterViewInit {
 
         let data$: Observable<any> = this.isClientSidePaging ? ClientSidePaging.paging(this.cachedData$, apiParam) : this.getDataSource(apiParam);
 
-         data$.pipe(
+        this.isWait = true;
+
+        data$.pipe(
             takeUntil(this.destroy$),
             map(data => {
                 this.dataCount = data.dataCount;
 
                 return data.data
-            })
+            }),
+            finalize(() => this.isWait = false)
         ).subscribe(data => {
             this.filteredRows = this.mapDataToGridRow(data);
             this.cdkRef.detectChanges();
