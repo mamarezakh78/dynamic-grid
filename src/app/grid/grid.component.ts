@@ -94,18 +94,20 @@ export class GridComponent extends Destoryable implements AfterViewInit {
     setCacheData() {
         this.clientSidePagingDataSource().pipe(
             takeUntil(this.destroy$)
-        ).subscribe(data => this.cachedData$.next(data))
+        ).subscribe(data => {
+            this.cachedData$.next(data)
+            this.cachedData$.complete();
+        })
     }
 
     private getData() {
 
         const apiParam: IFilterPageParam = this.getApiParams();
 
-        let data$: Observable<any> = this.isClientSidePaging ? ClientSidePaging.paging(this.cachedData$, apiParam) : this.getDataSource(apiParam);
+        let data$: Observable<IFilterPageResponse<any>> = this.isClientSidePaging ? ClientSidePaging.paging(this.cachedData$, apiParam) : this.getDataSource(apiParam);
 
-        if (!this.isClientSidePaging) {
-            this.isWait = true;
-        }
+        this.isWait = true;
+        this.cdkRef.detectChanges()
 
         data$.pipe(
             takeUntil(this.destroy$),
@@ -117,7 +119,6 @@ export class GridComponent extends Destoryable implements AfterViewInit {
             finalize(() => this.isWait = false)
         ).subscribe(data => {
             this.filteredRows = this.mapDataToGridRow(data);
-            this.cdkRef.detectChanges();
         })
     }
 
@@ -185,9 +186,13 @@ export class GridComponent extends Destoryable implements AfterViewInit {
             this.multiSelectedRows.clear();
         }
 
-        this.filteredRows.forEach(row => {
-            this.onChangeRowCheckBox(event, row);
-        })
+        this.cachedData$.asObservable().pipe(
+            map((dataList: any[]) => {
+                dataList.forEach(row => this.onChangeRowCheckBox(event, this.createGridRow(row)));
+                
+                return dataList
+            })
+        ).subscribe(() => this.getData())
     }
 
     getSearchValue(searchValue: string) {

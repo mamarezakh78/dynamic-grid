@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { ActionColumn, ActionOption, Column } from './grid/model/column.model';
 import { GridComponent } from './grid/grid.component';
 import { SampleService } from './services/sample.service';
-import { Observable, delay, of } from 'rxjs';
+import { Observable, delay, map, of } from 'rxjs';
 import { IFilterPageParam, IFilterPageResponse } from './grid/model/client-side-paging.model';
 import { IUser } from './interfaces/user.interface';
 
@@ -42,5 +42,20 @@ export class AppComponent {
         return this.sampleService.baseFilterService<IUser>(apiParam).pipe(delay(600))
     }
 
-    getStaticData = () => of(this.sampleService.generateSampleUserData());
+    getStaticData = () => of(this.sampleService.generateSampleUserData()).pipe(
+        delay(600),
+        map(res => {
+            setTimeout(() => {
+                res.push({
+                    userId: 95,
+                    username: "Mamareza",
+                    email: "mamareza@gmail.com",
+                    phone: "0935",
+                    company: "i4twins"
+                })
+            }, 5000);
+
+            return res
+        })
+    );
 }
