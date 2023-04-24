@@ -11,6 +11,7 @@ import { SearchComponent } from '../search/search.component';
 import { Destoryable } from '../tools/destroyable';
 import { ClientSidePaging, IFilterPageResponse, IFilterPageParam } from './model/client-side-paging.model';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { BooleanInput } from '@angular/cdk/coercion';
 
 @Component({
     standalone: true,
@@ -58,6 +59,8 @@ export class GridComponent extends Destoryable implements AfterViewInit {
     dataCount: number = 0;
 
     isWait: boolean = false;
+
+    checkAllValue: boolean = false;
 
     private cachedData$: ReplaySubject<any> = new ReplaySubject(1);
 
@@ -176,6 +179,10 @@ export class GridComponent extends Destoryable implements AfterViewInit {
     }
 
     onChangeRowCheckBox(event: MatCheckboxChange, row: GridRow) {
+        if (!event.checked) {
+            this.checkAllValue = false;
+        }
+        
         row.rowSelected = event.checked;
 
         this.multiSelectedRows.set(row.rowId, row);
